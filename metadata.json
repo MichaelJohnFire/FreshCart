@@ -1,0 +1,6 @@
+{
+  "name": "FreshCart",
+  "description": "Smart grocery and shopping list manager with autocomplete history, quantity tracking, and alphabetical sorting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
