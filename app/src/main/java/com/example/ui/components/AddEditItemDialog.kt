@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.data.local.ProductUnits
 import com.example.data.local.entity.ShoppingItemEntity
 import java.text.DecimalFormat
 
@@ -52,18 +53,30 @@ import java.text.DecimalFormat
 fun AddEditItemDialog(
     initialItem: ShoppingItemEntity? = null,
     suggestions: List<String>,
+    languageCode: String = "system",
     onQueryChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: (name: String, quantity: Double, unit: String) -> Unit
 ) {
     val isEditing = initialItem != null
+    val isPolish = remember(languageCode) { ProductUnits.isPolishLanguage(languageCode) }
+    val availableUnits = remember(languageCode) { ProductUnits.getAvailableUnits(languageCode) }
+    val defaultUnit = remember(languageCode) { ProductUnits.getDefaultUnit(languageCode) }
+
     var name by remember { mutableStateOf(initialItem?.name ?: "") }
     var quantity by remember { mutableDoubleStateOf(initialItem?.quantity ?: 1.0) }
-    var unit by remember { mutableStateOf(initialItem?.unit ?: "pcs") }
+    var unit by remember {
+        mutableStateOf(
+            if (initialItem != null) {
+                ProductUnits.localizeUnitForDisplay(initialItem.unit, isPolish)
+            } else {
+                defaultUnit
+            }
+        )
+    }
     var isNameError by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
-    val commonUnits = listOf("pcs", "kg", "g", "pack", "bottle", "can", "box", "liter")
     val df = remember { DecimalFormat("#.##") }
 
     LaunchedEffect(Unit) {
@@ -233,7 +246,7 @@ fun AddEditItemDialog(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    commonUnits.forEach { u ->
+                    availableUnits.forEach { u ->
                         FilterChip(
                             selected = unit.equals(u, ignoreCase = true),
                             onClick = { unit = u },

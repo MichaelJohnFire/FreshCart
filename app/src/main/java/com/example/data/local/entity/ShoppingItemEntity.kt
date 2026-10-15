@@ -17,7 +17,8 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index("listId"),
-        Index("name")
+        Index("name"),
+        Index("position")
     ]
 )
 data class ShoppingItemEntity(
@@ -28,5 +29,6 @@ data class ShoppingItemEntity(
     val quantity: Double = 1.0,
     val unit: String = "pcs",
     val isPurchased: Boolean = false,
+    val position: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )

@@ -18,7 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -61,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -69,11 +72,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.R
+import com.example.data.local.ProductUnits
 import com.example.data.local.entity.ShoppingItemEntity
 import com.example.data.local.entity.ShoppingListEntity
 import com.example.data.repository.ItemFilter
 import com.example.data.repository.SortOrder
+import com.example.ui.components.DragDropState
+import com.example.ui.components.dragHandle
+import com.example.ui.components.draggableItem
+import com.example.ui.components.rememberDragDropState
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,11 +93,13 @@ fun ListDetailScreen(
     sortOrder: SortOrder,
     itemFilter: ItemFilter,
     searchQuery: String,
+    languageCode: String = "system",
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
     onEditItemClick: (ShoppingItemEntity) -> Unit,
     onTogglePurchased: (ShoppingItemEntity) -> Unit,
     onDeleteItem: (ShoppingItemEntity) -> Unit,
+    onReorderItems: (List<ShoppingItemEntity>) -> Unit = {},
     onSortOrderChange: (SortOrder) -> Unit,
     onItemFilterChange: (ItemFilter) -> Unit,
     onSearchQueryChange: (String) -> Unit,
@@ -97,10 +108,25 @@ fun ListDetailScreen(
     onClearPurchasedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isPolish = remember(languageCode) { ProductUnits.isPolishLanguage(languageCode) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
     var moreMenuExpanded by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ShoppingItemEntity?>(null) }
     val decimalFormat = remember { DecimalFormat("#.##") }
+
+    var localItems by remember(items) { mutableStateOf(items) }
+    val lazyListState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(
+        lazyListState = lazyListState,
+        onMove = { fromIndex, toIndex ->
+            localItems = localItems.toMutableList().apply {
+                add(toIndex, removeAt(fromIndex))
+            }
+        },
+        onDragCompleted = {
+            onReorderItems(localItems)
+        }
+    )
 
     val totalCount = items.size
     val purchasedCount = items.count { it.isPurchased }
@@ -352,6 +378,7 @@ fun ListDetailScreen(
                 )
             } else {
                 LazyColumn(
+                    state = lazyListState,
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
@@ -361,10 +388,18 @@ fun ListDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(items, key = { it.id }) { item ->
+                    itemsIndexed(localItems, key = { _, item -> item.id }) { index, item ->
+                        val isDragging = dragDropState.draggingItemIndex == index
+                        val dragOffset = if (isDragging) dragDropState.draggingItemOffset else 0f
+
                         ShoppingItemRow(
                             item = item,
+                            index = index,
+                            isDragging = isDragging,
+                            dragOffset = dragOffset,
+                            dragDropState = dragDropState,
                             decimalFormat = decimalFormat,
+                            isPolish = isPolish,
                             onTogglePurchased = { onTogglePurchased(item) },
                             onEdit = { onEditItemClick(item) },
                             onDelete = { itemToDelete = item }
@@ -417,7 +452,12 @@ fun ListDetailScreen(
 @Composable
 private fun ShoppingItemRow(
     item: ShoppingItemEntity,
+    index: Int,
+    isDragging: Boolean,
+    dragOffset: Float,
+    dragDropState: DragDropState,
     decimalFormat: DecimalFormat,
+    isPolish: Boolean,
     onTogglePurchased: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -434,18 +474,36 @@ private fun ShoppingItemRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .zIndex(if (isDragging) 10f else 1f)
+            .graphicsLayer {
+                translationY = dragOffset
+                scaleX = if (isDragging) 1.03f else 1f
+                scaleY = if (isDragging) 1.03f else 1f
+                shadowElevation = if (isDragging) 8.dp.toPx() else 0f
+            }
+            .draggableItem(index, dragDropState)
             .clickable(onClick = onTogglePurchased)
             .testTag("item_row_${item.id}"),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (item.isPurchased) 0.dp else 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (item.isPurchased) 0.dp else if (isDragging) 8.dp else 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
+                .padding(horizontal = 4.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                imageVector = Icons.Default.DragHandle,
+                contentDescription = stringResource(R.string.cd_drag_handle),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 2.dp)
+                    .dragHandle(index, dragDropState)
+                    .testTag("drag_handle_${item.id}")
+            )
+
             Checkbox(
                 checked = item.isPurchased,
                 onCheckedChange = { onTogglePurchased() },
@@ -473,6 +531,9 @@ private fun ShoppingItemRow(
             }
 
             // Quantity & Unit pill badge
+            val displayUnit = remember(item.unit, isPolish) {
+                ProductUnits.localizeUnitForDisplay(item.unit, isPolish)
+            }
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = if (item.isPurchased) {
@@ -483,7 +544,7 @@ private fun ShoppingItemRow(
                 modifier = Modifier.padding(end = 4.dp)
             ) {
                 Text(
-                    text = "${decimalFormat.format(item.quantity)} ${item.unit}",
+                    text = "${decimalFormat.format(item.quantity)} $displayUnit",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (item.isPurchased) {

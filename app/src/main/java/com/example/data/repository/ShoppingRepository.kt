@@ -56,6 +56,7 @@ class ShoppingRepository(
     suspend fun addItem(listId: Long, name: String, quantity: Double, unit: String): Long {
         val cleanName = name.trim()
         val cleanUnit = unit.trim().ifEmpty { "pcs" }
+        val nextPosition = shoppingItemDao.getMaxPosition(listId) + 1
         val id = shoppingItemDao.insertItem(
             ShoppingItemEntity(
                 listId = listId,
@@ -63,6 +64,7 @@ class ShoppingRepository(
                 quantity = quantity,
                 unit = cleanUnit,
                 isPurchased = false,
+                position = nextPosition,
                 createdAt = System.currentTimeMillis()
             )
         )
@@ -71,6 +73,13 @@ class ShoppingRepository(
             productHistoryDao.recordProductUsage(cleanName, cleanUnit)
         }
         return id
+    }
+
+    suspend fun reorderItems(orderedItems: List<ShoppingItemEntity>) {
+        val positions = orderedItems.mapIndexed { index, item ->
+            Pair(item.id, index)
+        }
+        shoppingItemDao.updateItemOrder(positions)
     }
 
     suspend fun updateItem(id: Long, name: String, quantity: Double, unit: String) {

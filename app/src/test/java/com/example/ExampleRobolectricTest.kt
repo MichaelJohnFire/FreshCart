@@ -89,6 +89,36 @@ class ExampleRobolectricTest {
         assertEquals("Kupione", polishContext.getString(R.string.filter_purchased))
         assertEquals("Ustawienia", polishContext.getString(R.string.settings_title))
         assertEquals("Brak list zakupów", polishContext.getString(R.string.empty_lists_title))
+
+        // Polish unit string resources
+        assertEquals("g", polishContext.getString(R.string.unit_g))
+        assertEquals("kg", polishContext.getString(R.string.unit_kg))
+        assertEquals("dag", polishContext.getString(R.string.unit_dag))
+        assertEquals("litry", polishContext.getString(R.string.unit_liters))
+        assertEquals("szt", polishContext.getString(R.string.unit_pieces))
+        assertEquals("opk", polishContext.getString(R.string.unit_packages))
+    }
+
+    @Test
+    fun `polish product units rules and mapping`() {
+        val polishUnits = com.example.data.local.ProductUnits.getAvailableUnits("pl")
+        assertEquals(listOf("g", "kg", "dag", "litry", "szt", "opk"), polishUnits)
+        assertEquals("szt", com.example.data.local.ProductUnits.getDefaultUnit("pl"))
+
+        // Display localization for Polish
+        assertEquals("szt", com.example.data.local.ProductUnits.localizeUnitForDisplay("pcs", isPolish = true))
+        assertEquals("litry", com.example.data.local.ProductUnits.localizeUnitForDisplay("liter", isPolish = true))
+        assertEquals("opk", com.example.data.local.ProductUnits.localizeUnitForDisplay("pack", isPolish = true))
+        assertEquals("dag", com.example.data.local.ProductUnits.localizeUnitForDisplay("dag", isPolish = true))
+        assertEquals("kg", com.example.data.local.ProductUnits.localizeUnitForDisplay("kg", isPolish = true))
+        assertEquals("g", com.example.data.local.ProductUnits.localizeUnitForDisplay("g", isPolish = true))
+
+        // English default units
+        val englishUnits = com.example.data.local.ProductUnits.getAvailableUnits("en")
+        assertTrue(englishUnits.contains("pcs"))
+        assertEquals("pcs", com.example.data.local.ProductUnits.getDefaultUnit("en"))
+        assertEquals("pcs", com.example.data.local.ProductUnits.localizeUnitForDisplay("szt", isPolish = false))
+        assertEquals("liter", com.example.data.local.ProductUnits.localizeUnitForDisplay("litry", isPolish = false))
     }
 
     @Test
@@ -159,5 +189,28 @@ class ExampleRobolectricTest {
         assertEquals("Oranges", descItems[0].name)
         assertEquals("Bananas", descItems[1].name)
         assertEquals("Apples", descItems[2].name)
+    }
+
+    @Test
+    fun `reorder items and persist custom order`() = runBlocking {
+        val listId = repository.createList("Weekly Groceries")
+        val id1 = repository.addItem(listId, "Apples", 1.0, "kg")
+        val id2 = repository.addItem(listId, "Bread", 1.0, "pcs")
+        val id3 = repository.addItem(listId, "Cheese", 200.0, "g")
+
+        val initialItems = repository.getItems(listId, SortOrder.DEFAULT).first()
+        assertEquals("Apples", initialItems[0].name)
+        assertEquals("Bread", initialItems[1].name)
+        assertEquals("Cheese", initialItems[2].name)
+
+        // Simulate reordering: moving Cheese to first place, Apples to second, Bread to third
+        val reorderedList = listOf(initialItems[2], initialItems[0], initialItems[1])
+        repository.reorderItems(reorderedList)
+
+        // Fetch again using SortOrder.DEFAULT
+        val updatedItems = repository.getItems(listId, SortOrder.DEFAULT).first()
+        assertEquals("Cheese", updatedItems[0].name)
+        assertEquals("Apples", updatedItems[1].name)
+        assertEquals("Bread", updatedItems[2].name)
     }
 }

@@ -296,6 +296,13 @@ class ShoppingViewModel(
         }
     }
 
+    fun reorderItems(reorderedItems: List<ShoppingItemEntity>) {
+        _sortOrder.value = SortOrder.DEFAULT
+        viewModelScope.launch {
+            repository.reorderItems(reorderedItems)
+        }
+    }
+
     fun deleteItem(item: ShoppingItemEntity) {
         viewModelScope.launch {
             repository.deleteItem(item.id)

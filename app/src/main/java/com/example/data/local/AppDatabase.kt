@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
         ShoppingItemEntity::class,
         ProductHistoryEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -87,6 +87,7 @@ abstract class AppDatabase : RoomDatabase() {
                             name = "Fresh Milk",
                             quantity = 2.0,
                             unit = "liter",
+                            position = 0,
                             isPurchased = false
                         )
                     )
@@ -96,6 +97,7 @@ abstract class AppDatabase : RoomDatabase() {
                             name = "Sourdough Bread",
                             quantity = 1.0,
                             unit = "pcs",
+                            position = 1,
                             isPurchased = false
                         )
                     )
@@ -105,6 +107,7 @@ abstract class AppDatabase : RoomDatabase() {
                             name = "Organic Bananas",
                             quantity = 1.5,
                             unit = "kg",
+                            position = 2,
                             isPurchased = true
                         )
                     )

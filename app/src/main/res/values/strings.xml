@@ -13,7 +13,8 @@
     <string name="hint_unit">Unit</string>
     <string name="sort_az">Name (A to Z)</string>
     <string name="sort_za">Name (Z to A)</string>
-    <string name="sort_default">Date Added (Default)</string>
+    <string name="sort_default">Custom Order (Drag &amp; Drop)</string>
+    <string name="cd_drag_handle">Drag to reorder</string>
     <string name="filter_all">All</string>
     <string name="filter_unchecked">To Buy</string>
     <string name="filter_purchased">Purchased</string>
@@ -76,4 +77,15 @@
     <string name="shopping_lists_count_format">%1$d shopping lists</string>
     <string name="shopping_list_count_single">1 shopping list</string>
     <string name="shopping_list_count_zero">0 shopping lists</string>
+
+    <!-- Measurement Units -->
+    <string name="unit_g">g</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_dag">dag</string>
+    <string name="unit_liters">liters</string>
+    <string name="unit_pieces">pcs</string>
+    <string name="unit_packages">pack</string>
+    <string name="unit_bottle">bottle</string>
+    <string name="unit_can">can</string>
+    <string name="unit_box">box</string>
 </resources>
