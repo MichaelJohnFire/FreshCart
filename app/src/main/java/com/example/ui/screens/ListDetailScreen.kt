@@ -81,7 +81,6 @@ import com.example.data.repository.ItemFilter
 import com.example.data.repository.SortOrder
 import com.example.ui.components.DragDropState
 import com.example.ui.components.dragHandle
-import com.example.ui.components.draggableItem
 import com.example.ui.components.rememberDragDropState
 import java.text.DecimalFormat
 
@@ -481,7 +480,6 @@ private fun ShoppingItemRow(
                 scaleY = if (isDragging) 1.03f else 1f
                 shadowElevation = if (isDragging) 8.dp.toPx() else 0f
             }
-            .draggableItem(index, dragDropState)
             .clickable(onClick = onTogglePurchased)
             .testTag("item_row_${item.id}"),
         shape = RoundedCornerShape(12.dp),

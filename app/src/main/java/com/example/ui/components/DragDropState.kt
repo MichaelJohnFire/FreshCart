@@ -1,7 +1,6 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -85,21 +84,6 @@ fun Modifier.dragHandle(
     dragDropState: DragDropState
 ): Modifier = pointerInput(dragDropState, index) {
     detectDragGestures(
-        onDragStart = { dragDropState.onDragStart(index) },
-        onDrag = { change, dragAmount ->
-            change.consume()
-            dragDropState.onDrag(dragAmount.y)
-        },
-        onDragEnd = { dragDropState.onDragEnd() },
-        onDragCancel = { dragDropState.onDragCancel() }
-    )
-}
-
-fun Modifier.draggableItem(
-    index: Int,
-    dragDropState: DragDropState
-): Modifier = pointerInput(dragDropState, index) {
-    detectDragGesturesAfterLongPress(
         onDragStart = { dragDropState.onDragStart(index) },
         onDrag = { change, dragAmount ->
             change.consume()
