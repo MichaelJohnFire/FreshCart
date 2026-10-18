@@ -112,7 +112,6 @@ fun FreshCartApp(viewModel: ShoppingViewModel) {
                     items = uiState.items,
                     sortOrder = uiState.sortOrder,
                     itemFilter = uiState.itemFilter,
-                    searchQuery = uiState.searchQuery,
                     languageCode = uiState.languageCode,
                     onNavigateBack = { viewModel.navigateToOverview() },
                     onAddItemClick = { viewModel.openAddItemDialog() },
@@ -122,7 +121,6 @@ fun FreshCartApp(viewModel: ShoppingViewModel) {
                     onReorderItems = { reordered -> viewModel.reorderItems(reordered) },
                     onSortOrderChange = { order -> viewModel.setSortOrder(order) },
                     onItemFilterChange = { filter -> viewModel.setItemFilter(filter) },
-                    onSearchQueryChange = { query -> viewModel.setSearchQuery(query) },
                     onRenameListClick = {
                         uiState.currentList?.let { cur ->
                             viewModel.openEditListDialog(

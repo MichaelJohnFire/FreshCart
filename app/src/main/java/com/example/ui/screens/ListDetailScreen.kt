@@ -27,13 +27,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -49,7 +47,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -91,7 +88,6 @@ fun ListDetailScreen(
     items: List<ShoppingItemEntity>,
     sortOrder: SortOrder,
     itemFilter: ItemFilter,
-    searchQuery: String,
     languageCode: String = "system",
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
@@ -101,7 +97,6 @@ fun ListDetailScreen(
     onReorderItems: (List<ShoppingItemEntity>) -> Unit = {},
     onSortOrderChange: (SortOrder) -> Unit,
     onItemFilterChange: (ItemFilter) -> Unit,
-    onSearchQueryChange: (String) -> Unit,
     onRenameListClick: () -> Unit,
     onDeleteListClick: () -> Unit,
     onClearPurchasedClick: () -> Unit,
@@ -295,36 +290,13 @@ fun ListDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Search Bar & Filter Controls
+            // Filter Controls & Progress
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    placeholder = { Text(stringResource(R.string.search_items_placeholder)) },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.cd_clear_search))
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("search_items_input")
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
                 // Status Filter Chips
                 Row(
                     modifier = Modifier
@@ -369,7 +341,6 @@ fun ListDetailScreen(
             // Items List or Empty View
             if (items.isEmpty()) {
                 EmptyItemsView(
-                    isSearching = searchQuery.isNotBlank(),
                     onAddItemClick = onAddItemClick,
                     modifier = Modifier
                         .fillMaxSize()
@@ -583,7 +554,6 @@ private fun ShoppingItemRow(
 
 @Composable
 private fun EmptyItemsView(
-    isSearching: Boolean,
     onAddItemClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -602,26 +572,24 @@ private fun EmptyItemsView(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = if (isSearching) stringResource(R.string.no_matching_products) else stringResource(R.string.empty_items_title),
+            text = stringResource(R.string.empty_items_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = if (isSearching) stringResource(R.string.try_different_search) else stringResource(R.string.empty_items_subtitle),
+            text = stringResource(R.string.empty_items_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        if (!isSearching) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Button(
-                onClick = onAddItemClick,
-                modifier = Modifier.testTag("empty_add_item_button")
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.action_add_first_item))
-            }
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = onAddItemClick,
+            modifier = Modifier.testTag("empty_add_item_button")
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.action_add_first_item))
         }
     }
 }
