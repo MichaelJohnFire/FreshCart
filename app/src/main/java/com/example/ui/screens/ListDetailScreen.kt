@@ -24,9 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.DragHandle
@@ -75,7 +73,6 @@ import com.example.data.local.ProductUnits
 import com.example.data.local.entity.ShoppingItemEntity
 import com.example.data.local.entity.ShoppingListEntity
 import com.example.data.repository.ItemFilter
-import com.example.data.repository.SortOrder
 import com.example.ui.components.DragDropState
 import com.example.ui.components.dragHandle
 import com.example.ui.components.rememberDragDropState
@@ -86,7 +83,6 @@ import java.text.DecimalFormat
 fun ListDetailScreen(
     list: ShoppingListEntity?,
     items: List<ShoppingItemEntity>,
-    sortOrder: SortOrder,
     itemFilter: ItemFilter,
     languageCode: String = "system",
     onNavigateBack: () -> Unit,
@@ -95,7 +91,6 @@ fun ListDetailScreen(
     onTogglePurchased: (ShoppingItemEntity) -> Unit,
     onDeleteItem: (ShoppingItemEntity) -> Unit,
     onReorderItems: (List<ShoppingItemEntity>) -> Unit = {},
-    onSortOrderChange: (SortOrder) -> Unit,
     onItemFilterChange: (ItemFilter) -> Unit,
     onRenameListClick: () -> Unit,
     onDeleteListClick: () -> Unit,
@@ -103,7 +98,6 @@ fun ListDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val isPolish = remember(languageCode) { ProductUnits.isPolishLanguage(languageCode) }
-    var sortMenuExpanded by remember { mutableStateOf(false) }
     var moreMenuExpanded by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ShoppingItemEntity?>(null) }
     val decimalFormat = remember { DecimalFormat("#.##") }
@@ -157,63 +151,6 @@ fun ListDetailScreen(
                     }
                 },
                 actions = {
-                    // Sort options menu
-                    Box {
-                        IconButton(
-                            onClick = { sortMenuExpanded = true },
-                            modifier = Modifier.testTag("sort_menu_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = stringResource(R.string.cd_sort)
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = sortMenuExpanded,
-                            onDismissRequest = { sortMenuExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.sort_az)) },
-                                trailingIcon = {
-                                    if (sortOrder == SortOrder.ALPHABETICAL_ASC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                    }
-                                },
-                                onClick = {
-                                    onSortOrderChange(SortOrder.ALPHABETICAL_ASC)
-                                    sortMenuExpanded = false
-                                },
-                                modifier = Modifier.testTag("sort_az_option")
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.sort_za)) },
-                                trailingIcon = {
-                                    if (sortOrder == SortOrder.ALPHABETICAL_DESC) {
-                                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                    }
-                                },
-                                onClick = {
-                                    onSortOrderChange(SortOrder.ALPHABETICAL_DESC)
-                                    sortMenuExpanded = false
-                                },
-                                modifier = Modifier.testTag("sort_za_option")
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.sort_default)) },
-                                trailingIcon = {
-                                    if (sortOrder == SortOrder.DEFAULT) {
-                                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                    }
-                                },
-                                onClick = {
-                                    onSortOrderChange(SortOrder.DEFAULT)
-                                    sortMenuExpanded = false
-                                },
-                                modifier = Modifier.testTag("sort_default_option")
-                            )
-                        }
-                    }
 
                     // More actions menu
                     Box {

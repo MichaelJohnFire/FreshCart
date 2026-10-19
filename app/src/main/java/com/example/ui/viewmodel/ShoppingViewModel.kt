@@ -36,7 +36,7 @@ data class ShoppingUiState(
     val lists: List<ShoppingListSummary> = emptyList(),
     val currentList: ShoppingListEntity? = null,
     val items: List<ShoppingItemEntity> = emptyList(),
-    val sortOrder: SortOrder = SortOrder.ALPHABETICAL_ASC,
+    val sortOrder: SortOrder = SortOrder.DEFAULT,
     val itemFilter: ItemFilter = ItemFilter.ALL,
     val searchQuery: String = "",
     val autocompleteSuggestions: List<String> = emptyList(),
@@ -58,7 +58,7 @@ class ShoppingViewModel(
 ) : AndroidViewModel(application) {
 
     private val _currentScreen = MutableStateFlow<Screen>(Screen.Overview)
-    private val _sortOrder = MutableStateFlow(SortOrder.ALPHABETICAL_ASC)
+    private val _sortOrder = MutableStateFlow(SortOrder.DEFAULT)
     private val _itemFilter = MutableStateFlow(ItemFilter.ALL)
     private val _searchQuery = MutableStateFlow("")
     private val _autocompleteQuery = MutableStateFlow("")
