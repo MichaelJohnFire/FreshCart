@@ -42,7 +42,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -51,10 +50,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,7 +120,16 @@ fun ListDetailScreen(
 
     val totalCount = items.size
     val purchasedCount = items.count { it.isPurchased }
-    val progress = if (totalCount > 0) purchasedCount.toFloat() / totalCount.toFloat() else 0f
+
+    val coroutineScope = rememberCoroutineScope()
+    var shouldKeepTopVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(items) {
+        if (shouldKeepTopVisible) {
+            lazyListState.scrollToItem(0, 0)
+            shouldKeepTopVisible = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -260,19 +271,6 @@ fun ListDetailScreen(
                         modifier = Modifier.testTag("filter_purchased_chip")
                     )
                 }
-
-                if (totalCount > 0) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                }
             }
 
             // Items List or Empty View
@@ -307,7 +305,13 @@ fun ListDetailScreen(
                             dragDropState = dragDropState,
                             decimalFormat = decimalFormat,
                             isPolish = isPolish,
-                            onTogglePurchased = { onTogglePurchased(item) },
+                            onTogglePurchased = {
+                                shouldKeepTopVisible = true
+                                onTogglePurchased(item)
+                                coroutineScope.launch {
+                                    lazyListState.scrollToItem(0, 0)
+                                }
+                            },
                             onEdit = { onEditItemClick(item) },
                             onDelete = { itemToDelete = item }
                         )
