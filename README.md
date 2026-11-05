@@ -33,3 +33,6 @@ The app currently supports:
 
 License
 This project is open-source and available under the MIT License.
+
+Download link for APK:
+https://github.com/MichaelJohnFire/FreshCart/actions/runs/40546346401/artifacts/12753745286
