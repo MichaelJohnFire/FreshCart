@@ -95,7 +95,6 @@ fun ListDetailScreen(
     onReorderItems: (List<ShoppingItemEntity>) -> Unit = {},
     onItemFilterChange: (ItemFilter) -> Unit,
     onRenameListClick: () -> Unit,
-    onDeleteListClick: () -> Unit,
     onClearPurchasedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -197,21 +196,6 @@ fun ListDetailScreen(
                                     onClearPurchasedClick()
                                 },
                                 modifier = Modifier.testTag("clear_purchased_option")
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_delete_list), color = MaterialTheme.colorScheme.error) },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                },
-                                onClick = {
-                                    moreMenuExpanded = false
-                                    onDeleteListClick()
-                                },
-                                modifier = Modifier.testTag("delete_list_option")
                             )
                         }
                     }

@@ -133,11 +133,6 @@ fun FreshCartApp(viewModel: ShoppingViewModel) {
                             )
                         }
                     },
-                    onDeleteListClick = {
-                        uiState.currentList?.let { cur ->
-                            viewModel.deleteList(cur.id, cur.name)
-                        }
-                    },
                     onClearPurchasedClick = {
                         viewModel.deletePurchasedItems(screen.listId)
                     },
